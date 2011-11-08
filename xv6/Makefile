@@ -47,7 +47,8 @@ ULIB = \
 	ulib.o\
 	usys.o\
 	printf.o\
-	umalloc.o
+	umalloc.o\
+	threadlib.o
 
 # user programs
 UPROGS = \
@@ -66,7 +67,8 @@ UPROGS = \
 	tester\
 	usertests\
 	wc\
-	zombie
+	zombie\
+	threadtest
 
 UOBJS = $(UPROGS:%=%.o)
 

@@ -157,6 +157,55 @@ fork(void)
   return pid;
 }
 
+// Create a new process copying p as the parent. Shares the address space.
+int
+clone(void)
+{
+  //Get arguments off the stack
+  void *stack = NULL;
+  argptr(0, (char **)stack, sizeof(stack));
+
+  int size;
+  argint(1, &size);
+
+  int i, pid;
+  struct proc *np;
+
+  // Allocate process.
+  if((np = allocproc()) == 0)
+    return -1;
+
+  np->pgdir = proc->pgdir;
+  np->sz = proc->sz;
+  np->parent = proc;
+
+
+  *np->tf = *proc->tf;
+  np->tf->esp = (uint) (stack + size);//Swap it since the heap grows up and the stack grows down
+
+  //Copy the current frame into the stack
+  void *startCopy = (void *)proc->tf->ebp + 12;
+  void *endCopy = (void *)proc->tf->esp;
+  uint copySize = (uint) (startCopy - endCopy);
+
+  memmove(stack, endCopy, copySize);
+
+
+
+  // Clear %eax so that fork returns 0 in the child.
+  np->tf->eax = 0;
+
+  for(i = 0; i < NOFILE; i++)
+    if(proc->ofile[i])
+      np->ofile[i] = filedup(proc->ofile[i]);
+  np->cwd = idup(proc->cwd);
+ 
+  pid = np->pid;
+  np->state = RUNNABLE;
+  safestrcpy(np->name, proc->name, sizeof(proc->name));
+  return pid;
+}
+
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.
@@ -221,7 +270,8 @@ wait(void)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        freevm(p->pgdir);
+        if(p->pgdir != proc->pgdir)
+          freevm(p->pgdir);
         p->state = UNUSED;
         p->pid = 0;
         p->parent = 0;

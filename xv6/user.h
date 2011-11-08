@@ -1,4 +1,5 @@
 struct stat;
+struct lock_t;
 
 // system calls
 int fork(void);
@@ -22,6 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int clone(void* stack, int size);
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -36,3 +38,10 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+// threadlib.c
+void thread_create(void *(*start_routine)(void*), void *arg);
+void thread_join();
+void lock_init(struct lock_t *);
+void lock_acquire(struct lock_t *);
+void lock_release(struct lock_t *);

@@ -20,6 +20,7 @@
 #define SYS_sbrk   19
 #define SYS_sleep  20
 #define SYS_uptime 21
+#define SYS_clone  22
 
 #if (!__ASSEMBLER__)
 int sys_chdir(void);
@@ -43,4 +44,6 @@ int sys_unlink(void);
 int sys_wait(void);
 int sys_write(void);
 int sys_uptime(void);
+int sys_clone(void);
+
 #endif // !__ASSEMBLER__
