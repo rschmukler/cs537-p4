@@ -159,15 +159,8 @@ fork(void)
 
 // Create a new process copying p as the parent. Shares the address space.
 int
-clone(void)
+clone(void* stack, int size)
 {
-  //Get arguments off the stack
-  void *stack = NULL;
-  argptr(0, (char **)stack, sizeof(stack));
-
-  int size;
-  argint(1, &size);
-
   int i, pid;
   struct proc *np;
 
@@ -175,20 +168,24 @@ clone(void)
   if((np = allocproc()) == 0)
     return -1;
 
+  struct proc *procCopy = proc;
+  if(procCopy == NULL)
+    ;
   np->pgdir = proc->pgdir;
   np->sz = proc->sz;
   np->parent = proc;
 
 
   *np->tf = *proc->tf;
-  np->tf->esp = (uint) (stack + size);//Swap it since the heap grows up and the stack grows down
-
   //Copy the current frame into the stack
-  void *startCopy = (void *)proc->tf->ebp + 12;
+  void *startCopy = (void *)proc->tf->ebp + 16;
   void *endCopy = (void *)proc->tf->esp;
   uint copySize = (uint) (startCopy - endCopy);
 
-  memmove(stack, endCopy, copySize);
+  np->tf->esp = (uint) (stack - copySize);//Swap to our address space
+  np->tf->ebp = (uint) (stack - 16);
+
+  memmove(stack - copySize, endCopy, copySize);
 
 
 

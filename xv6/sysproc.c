@@ -14,7 +14,12 @@ sys_fork(void)
 int
 sys_clone(void)
 {
-  return clone();
+  //Get arguments off the stack
+  void *stack = NULL;
+  int size;
+  argint(1, &size);
+  argptr(0, (char **)&stack, size);
+  return clone(stack, size);
 }
 
 int

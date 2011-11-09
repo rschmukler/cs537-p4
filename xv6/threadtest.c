@@ -16,6 +16,7 @@ void *counter(void *arg)
 {
 	counter_args *args= (counter_args*)arg;
 
+
 	int i;
 
 	for(i = 0; i < *args->nLoops; i++)
@@ -39,32 +40,33 @@ main(int argc, char *argv[])
 		return -1;
 	}
 	
-	int * nThreads = (int*) &argv[1];
-	int * nLoops = (int*) &argv[2];
+	int nThreads = atoi(argv[1]);
+	int nLoops =  atoi(argv[2]);
 	
-	int *count = 0;
+	int count = 0;
 	struct lock_t lock;
 	lock_init(&lock);
 
 	counter_args args;
-	args.nLoops = nLoops;
-	args.count = count;
+	args.nLoops = &nLoops;
+	args.count = &count;
 	args.lock = &lock;
 
 	void * a = (void*) &args;
 
 	int i;
-	for(i = 0; i < *nThreads; i++)
+	for(i = 0; i < nThreads; i++)
 	{
 		thread_create(counter, a);
 	}
 
-	for(i = 0; i < *nThreads; i++)
+	for(i = 0; i < nThreads; i++)
 	{
 		thread_join();
 	}
 	
-	printf(1, "%d\n", count);
-	return 0;
+	printf(1, "Result is: %d\n", count);
+	exit();
+
 }
 
