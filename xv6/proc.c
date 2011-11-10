@@ -99,6 +99,27 @@ userinit(void)
   p->state = RUNNABLE;
 }
 
+
+// added
+void
+resize(struct proc * p, uint newsz)
+{
+	p->sz = newsz;
+
+	acquire(&ptable.lock);
+	uint i;
+	for(i = 0; i < NPROC; i++)
+	{
+		if(ptable.proc[i].state != UNUSED)			// expanded for debugging
+			if(ptable.proc[i].pgdir == p->pgdir)
+			{
+				ptable.proc[i].sz = newsz;
+			}
+	}
+	release(&ptable.lock);
+}
+// /added
+
 // Grow current process's memory by n bytes.
 // Return 0 on success, -1 on failure.
 int
@@ -114,7 +135,8 @@ growproc(int n)
     if((sz = deallocuvm(proc->pgdir, sz, sz + n)) == 0)
       return -1;
   }
-  proc->sz = sz;
+  //proc->sz = sz;	// original
+  resize(proc, sz);	// add
   switchuvm(proc);
   return 0;
 }
