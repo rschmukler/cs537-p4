@@ -28,11 +28,6 @@ void *counter(void *arg)
 	return NULL;
 }
 
-void *doNothing(void * nothing)
-{
-	return NULL;
-}
-
 int
 main(int argc, char *argv[])
 {
